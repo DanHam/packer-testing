@@ -1,0 +1,53 @@
+{
+  "variables": {
+    "template": "centos-7-x86_64",
+
+    "debug": "false",
+    "guest_additions_path": "/tmp/VBoxGuestAdditions.iso",
+
+    "ssh_username": "coadmin",
+    "ssh_private_key": "insecure.id_rsa"
+  },
+
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "source_path": "output-virtualbox-iso/{{user `template`}}.ovf",
+
+      "communicator": "ssh",
+      "headless": false,
+
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "1024"],
+        ["modifyvm", "{{.Name}}", "--cpus", "1"],
+        ["setextradata", "global", "GUI/SuppressMessages", "all"]
+      ],
+
+      "vm_name": "{{user `template`}}",
+
+      "guest_additions_mode": "upload",
+      "guest_additions_path": "{{user `guest_additions_path`}}",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key`}}",
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "GUEST_ADDITIONS_PATH={{user `guest_additions_path`}}"
+      ],
+      "execute_command": "{{ .Vars }} sudo -E $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/00-yum-update.sh",
+        "scripts/01-remove-old-kernels.sh",
+        "scripts/20-install-vbox-guest-additions.sh"
+      ]
+    }
+  ]
+}
