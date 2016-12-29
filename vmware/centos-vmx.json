@@ -1,0 +1,53 @@
+{
+  "variables": {
+    "template": "centos-7-x86_64",
+
+    "debug": "false",
+
+    "vmtools_iso_path": "/tmp/vmware-tools.iso",
+
+    "ssh_username": "coadmin",
+    "ssh_private_key_file": "insecure.id_rsa"
+
+  },
+
+  "builders": [
+    {
+      "type": "vmware-vmx",
+      "communicator": "ssh",
+      "headless": false,
+
+      "source_path": "output-vmware-iso/centos-7-x86_64.vmx",
+
+      "vm_name": "{{user `template`}}",
+
+      "vmx_data": {
+        "memsize": "1024",
+        "numvcpus": "1"
+      },
+
+      "tools_upload_flavor": "linux",
+      "tools_upload_path": "{{user `vmtools_iso_path`}}",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key_file`}}",
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{ .Vars }} sudo -E $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "VMTOOLS_ISO_PATH={{user `vmtools_iso_path`}}"
+      ],
+      "scripts": [
+        "scripts/20-install-open-vm-tools.sh",
+        "scripts/21-install-vmware-tools.sh"
+      ]
+    }
+  ]
+}
