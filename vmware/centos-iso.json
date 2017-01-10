@@ -75,5 +75,14 @@
         "scripts/11-configure-sudoers.sh"
       ]
     }
+  ],
+
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "vagrantfile_template": "files/Vagrantfile.vmware",
+      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
+    }
   ]
 }
