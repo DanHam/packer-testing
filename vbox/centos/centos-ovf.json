@@ -16,7 +16,6 @@
 
       "communicator": "ssh",
       "headless": false,
-      "skip_export": true,
 
       "vboxmanage": [
         ["modifyvm", "{{.Name}}", "--memory", "1024"],
@@ -40,30 +39,14 @@
     {
       "type": "shell",
       "environment_vars": [
-        "VARA=bar",
-        "VARB=Dan's",
-        "VARC='Foo'"
+        "DEBUG={{user `debug`}}",
+        "GUEST_ADDITIONS_PATH={{user `guest_additions_path`}}"
       ],
-      "inline": [
-        "echo \"VARA is ${VARA}\"",
-        "echo \"VARB is ${VARB}\"",
-        "echo \"VARC is ${VARC}\""
-      ]
-    }
-  ],
-
-  "post-processors": [
-    {
-      "type": "shell-local",
-      "environment_vars": [
-        "VAR_LOCALA=bar",
-        "VAR_LOCALB=Dan's",
-        "VAR_LOCALC='Foo'"
-      ],
-      "inline": [
-        "echo \"VAR_LOCALA is ${VAR_LOCALA}\"",
-        "echo \"VAR_LOCALB is ${VAR_LOCALB}\"",
-        "echo \"VAR_LOCALC is ${VAR_LOCALC}\""
+      "execute_command": "{{ .Vars }} sudo -E $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/00-yum-update.sh",
+        "scripts/01-remove-old-kernels.sh",
+        "scripts/20-install-vbox-guest-additions.sh"
       ]
     }
   ]
