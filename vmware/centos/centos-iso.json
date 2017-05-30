@@ -6,7 +6,7 @@
     "iso_checksum": "c455ee948e872ad2194bdddd39045b83634e8613249182b88f549bb2319d97eb",
     "iso_checksum_type": "sha256",
 
-    "debug": "false",
+    "debug": "true",
 
     "admin_create": "true",
     "admin_user": "coadmin",
@@ -46,6 +46,7 @@
         "numvcpus": "1"
       },
       "disk_size": "10240",
+      "disk_type_id": "0",
 
       "ssh_username": "root",
       "ssh_private_key_file": "insecure.id_rsa",
@@ -71,6 +72,9 @@
         "ADMIN_SSH_AUTHORISED_KEY={{user `admin_ssh_authorised_key`}}"
       ],
       "scripts": [
+        "scripts/00-remove-extraneous-packages.sh",
+        "scripts/01-yum-update.sh",
+        "scripts/02-remove-old-kernels.sh",
         "scripts/10-create-admin-user.sh",
         "scripts/11-configure-sudoers.sh"
       ]
