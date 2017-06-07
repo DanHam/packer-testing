@@ -3,3 +3,4 @@
 # Clean packer build artifacts
 rm -f boxes/*box
 rm -rf output-virtualbox-*
+rm -rf packer_cache
