@@ -16,7 +16,9 @@
     "admin_groups": "wheel",
     "admin_shell": "/bin/bash",
     "admin_gecos": "CentOS Administrator",
-    "admin_ssh_authorised_key": "ssh-rsa AAAAB4NzaC1yc2EAAAADAQABAAACAQDY67BeAmBU4I5fvT3hdqrVsXCA7jaq5mVdkaaCHjIOBSpFAXAGha/TUDLC6n2+NtOmcOYjWR7P+48I74TVe/4ZkuSnyg9R63Jng5FsuOlJBoz8obl5F6qVvMnP+Q6BLmlnkmlcsZv35teI3I5WsYk4QaML7WHvuYjEykxEuCkOpvcC/UmlblMji5KAkW2gn+UQHTa5r2Ku441aLnaadKBrX2tqV8a6Q+nF382cOH2Gx6mqKPImNA4LmDdejXDRgz4XC3zkvqJyDhTC8CKAF4H0dssOmOtA0p3Q5sM+of1fper8rsmtegFPjGBVchiEd0Sazo3oStd1eKEIRWvMkoQyz649eDICORcOCV9HwlTIjLN4queQ0RY8l3pOwLl90RO1lAjqbODdBE7jcoG4JFeOEF4XH40df7aHSHKiNsDjZ+KK0nFEpndeX3ULa/1ZloZiaGtd6lGC31j7xpUA6MCSQ6RDg6Ev+Mo1nMT7A+gK5iVBLdi6b6aYAwDsWu8/VWMgRRj3tk/dMnuYwwiI0r6odzMaYMWSvh1CG5JExdDKxg+dJaecupZqZwJMJhfno+AgarGhnBt7vlMinRotvDufHLtfmyRkCTMl58q1Eg3AfdzXjWIc8cSjRhogIVbchZNYNyFk7i+kUjV/DsCUuS1QB9NuYoLSrm7O3N84M9tFRQ== InsecureKey"
+    "admin_ssh_authorised_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDY67BeAmBU4I5fvT3hdqrVsXCA7jaq5mVdkaaCHjIOBSpFAXAGha/TUDLC6n2+NtOmcOYjWR7P+48I74TVe/4ZkuSnyg9R63Jng5FsuOlJBoz8obl5F6qVvMnP+Q6BLmlnkmlcsZv35teI3I5WsYk4QaML7WHvuYjEykxEuCkOpvcC/UmlblMji5KAkW2gn+UQHTa5r2Ku441aLnaadKBrX2tqV8a6Q+nF382cOH2Gx6mqKPImNA4LmDdejXDRgz4XC3zkvqJyDhTC8CKAF4H0dssOmOtA0p3Q5sM+of1fper8rsmtegFPjGBVchiEd0Sazo3oStd1eKEIRWvMkoQyz649eDICORcOCV9HwlTIjLN4queQ0RY8l3pOwLl90RO1lAjqbODdBE7jcoG4JFeOEF4XH40df7aHSHKiNsDjZ+KK0nFEpndeX3ULa/1ZloZiaGtd6lGC31j7xpUA6MCSQ6RDg6Ev+Mo1nMT7A+gK5iVBLdi6b6aYAwDsWu8/VWMgRRj3tk/dMnuYwwiI0r6odzMaYMWSvh1CG5JExdDKxg+dJaecupZqZwJMJhfno+AgarGhnBt7vlMinRotvDufHLtfmyRkCTMl58q1Eg3AfdzXjWIc8cSjRhogIVbchZNYNyFk7i+kUjV/DsCUuS1QB9NuYoLSrm7O3N84M9tFRQ== InsecureKey",
+
+    "vmtools_iso_path": "/tmp/vmware-tools.iso"
   },
 
   "builders": [
@@ -46,6 +48,8 @@
       },
       "disk_size": "10240",
       "disk_type_id": "0",
+      "tools_upload_flavor": "linux",
+      "tools_upload_path": "{{user `vmtools_iso_path`}}",
 
       "ssh_username": "root",
       "ssh_private_key_file": "insecure.id_rsa",
@@ -68,14 +72,17 @@
         "ADMIN_GROUPS={{user `admin_groups`}}",
         "ADMIN_SHELL={{user `admin_shell`}}",
         "ADMIN_GECOS={{user `admin_gecos`}}",
-        "ADMIN_SSH_AUTHORISED_KEY={{user `admin_ssh_authorised_key`}}"
+        "ADMIN_SSH_AUTHORISED_KEY={{user `admin_ssh_authorised_key`}}",
+        "VMTOOLS_ISO_PATH={{user `vmtools_iso_path`}}"
       ],
       "scripts": [
         "scripts/00-remove-extraneous-packages.sh",
         "scripts/01-yum-update.sh",
         "scripts/02-remove-old-kernels.sh",
         "scripts/10-create-admin-user.sh",
-        "scripts/11-configure-sudoers.sh"
+        "scripts/11-configure-sudoers.sh",
+        "scripts/20-install-open-vm-tools.sh",
+        "scripts/21-install-vmware-tools.sh"
       ]
     }
   ],
