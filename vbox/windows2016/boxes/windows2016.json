@@ -1,0 +1,24 @@
+{
+  "name": "neos-cloud/windows2016",
+  "description": "This box contains Windows 2016 Server Full",
+  "versions": [
+    {
+      "version": "0.1.7",
+      "providers": [
+        {
+          "name": "virtualbox",
+          "url": "file:////Users/dan/working/packer-templates/windows2016/boxes/windows2016-virtualbox.box",
+          "checksum_type": "sha1",
+          "checksum": "863389728266c7ace9f1da507c19d6c71d9a8468"
+        },
+        {
+          "name": "vmware_desktop",
+          "url": "file:////Users/dan/working/packer-templates/windows2016/boxes/windows2016-vmware.box",
+          "checksum_type": "sha1",
+          "checksum": "d87bd75c2d76c53d28d286c6deab35da62dadf46"
+        }
+
+      ]
+    }
+  ]
+}

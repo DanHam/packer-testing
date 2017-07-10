@@ -1,0 +1,23 @@
+{
+  "name": "neos-cloud/windows2012r2",
+  "description": "This box contains Windows 2012 R2 Server Full",
+  "versions": [
+    {
+      "version": "0.1.1",
+      "providers": [
+        {
+          "name": "virtualbox",
+          "url": "file:////Users/dan/working/packer-templates/windows2012r2/boxes/windows2012r2-virtualbox.box",
+          "checksum_type": "sha1",
+          "checksum": "3d75ec8541b5767d3cb8fac0a29bb1ec18f916ee"
+        },
+        {
+          "name": "vmware_desktop",
+          "url": "file:////Users/dan/working/packer-templates/windows2012r2/boxes/windows2012r2-vmware.box",
+          "checksum_type": "sha1",
+          "checksum": "d579fd2cba7bce176290f95835391a50e74696a5"
+        }
+      ]
+    }
+  ]
+}

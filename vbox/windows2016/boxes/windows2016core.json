@@ -1,0 +1,24 @@
+{
+  "name": "neos-cloud/windows2016core",
+  "description": "This box contains Windows 2016 Server Core",
+  "versions": [
+    {
+      "version": "0.1.1",
+      "providers": [
+        {
+          "name": "virtualbox",
+          "url": "file:////Users/dan/working/packer-templates/windows2016/boxes/windows2016core-virtualbox.box",
+          "checksum_type": "sha1",
+          "checksum": "839e16af1b8d9207c4faabab1449a76167d6bbc8"
+        },
+        {
+          "name": "vmware_desktop",
+          "url": "file:////Users/dan/working/packer-templates/windows2016/boxes/windows2016core-vmware.box",
+          "checksum_type": "sha1",
+          "checksum": "26f63be783d5dbc4359c61dda1f4d9bf4d8c12ac"
+        }
+
+      ]
+    }
+  ]
+}

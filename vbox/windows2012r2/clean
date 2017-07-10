@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#
+# Clean packer temp files
+rm -rf packer_cache
+# Clean packer build artifacts
+rm -f boxes/*box
+rm -rf output-windows2012r2-*
+rm -rf output-windows2012r2core-*

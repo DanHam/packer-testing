@@ -1,0 +1,23 @@
+{
+  "name": "neos-cloud/windows2012r2core",
+  "description": "This box contains Windows 2012 R2 Server Core",
+  "versions": [
+    {
+      "version": "0.1.1",
+      "providers": [
+        {
+          "name": "virtualbox",
+          "url": "file:////Users/dan/working/packer-templates/windows2012r2/boxes/windows2012r2core-virtualbox.box",
+          "checksum_type": "sha1",
+          "checksum": "34a807a78bb9ab99a5205f91454981fce3d2e76b"
+        },
+        {
+          "name": "vmware_desktop",
+          "url": "file:////Users/dan/working/packer-templates/windows2012r2/boxes/windows2012r2core-vmware.box",
+          "checksum_type": "sha1",
+          "checksum": "338f3d1887f75af3eb64be8597d264f4bda9e268"
+        }
+      ]
+    }
+  ]
+}
