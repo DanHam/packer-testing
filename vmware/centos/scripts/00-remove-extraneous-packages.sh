@@ -13,7 +13,6 @@ echo "Removing extraneous packages installed by Anaconda..."
 # seems to ignore options and settings in the %packages section and does
 # its own thing regardless...
 PACKAGE_LIST=(
-    cowsay
     atk
     atkmm
     btrfs-progs
