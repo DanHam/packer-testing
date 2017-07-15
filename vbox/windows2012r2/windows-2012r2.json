@@ -166,7 +166,7 @@
     },
     { "type": "powershell",
       "environment_vars": [
-        "FOO=BAR"
+        "FOO=$(Write-Host \"This is output from a command I executed\")"
       ],
       "scripts": [
         "files/ProgPrefTest.ps1"
