@@ -16,4 +16,5 @@ If ((Test-Path variable:global:ProgressPreference) -and ($ProgressPreference -ne
     LogWrite "Elevated Powershell says: This is output after the value of ProgressPreference was changed to 'SilentlyContinue'"
 }
 
-Write-Host "Hello World! I'm output from an elevated Powershell script"
+Write-Host "Hello STDOUT! I'm standard output from an elevated Powershell script"
+Write-Error "Hello STDERR! I'm error output from an elevated Powershell script"

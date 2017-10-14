@@ -148,36 +148,38 @@
       "type": "powershell",
       "elevated_password": "SuperS3cr3t",
       "elevated_user": "adminuser",
-      "inline": "write-output \"Hello. This output should appear in the log during the packer run\""
+      "inline": "write-output \"Hello. Output from ELEVATED INLINE with NO env vars\""
     },
-    { "type": "powershell",
+    {
+      "type": "powershell",
       "environment_vars": [
         "FOO=BAR"
       ],
       "inline": "write-output \"Normal inline PS command: FOO is equal to $env:FOO.\""
     },
-    { "type": "powershell",
+    {
+      "type": "powershell",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "BAR=BAZ"
+        "BAR=BAZ",
+        "FOO=$(Write-Host \"This is output from a COMMAND EMBEDDED in an ELEVATED env var that should not appear\")"
       ],
       "inline": "write-output \"Elevated inline PS command: BAR is equal to $env:BAR\""
     },
-    { "type": "powershell",
+    {
+      "type": "powershell",
       "environment_vars": [
-        "FOO=$(Write-Host \"This is output from a command I executed\")"
+        "FOO=$(Write-Host \"This is output from a COMMAND EMBEDDED in an env var that should not appear\")"
       ],
       "scripts": [
         "files/ProgPrefTest.ps1"
       ]
     },
-    { "type": "powershell",
+    {
+      "type": "powershell",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
-      "environment_vars": [
-        "MOO=BAZ"
-      ],
       "scripts": [
         "files/ElevProgPrefTest.ps1"
       ]

@@ -142,11 +142,28 @@
   ],
 
   "provisioners": [
-    { "type": "powershell",
+    {
+      "type": "powershell",
+      "inline": [
+        "net user adminuser SuperS3cr3t /ADD",
+        "net localgroup Administrators adminuser /add",
+        "net user adminuser /ACTIVE:YES"
+      ]
+    },
+    {
+      "type": "powershell",
+      "elevated_password": "SuperS3cr3t",
+      "elevated_user": "adminuser",
       "environment_vars": [
-        "PACKAGES={{user `packages`}}"
+        "FOO=BAR"
       ],
-      "inline": "write-output \"PACKAGES is equal to $env:PACKAGES.\""
+      "inline": "write-output \"Elevated PS output with DIFFERENT creds to WinRM user says FOO is equal to $env:FOO\""
+    },
+    {
+      "type": "powershell",
+      "elevated_password": "SuperS3cr3t",
+      "elevated_user": "adminuser",
+      "inline": "write-output \"Elevated PS output with DIFFERENT creds to WinRM user with NO user env vars still errors\""
     },
     { "type": "powershell",
       "elevated_user": "vagrant",
@@ -158,7 +175,13 @@
     },
     { "type": "powershell",
       "environment_vars": [
-        "FOO=$(Write-Host \"This is output from a command I executed\")"
+        "FOO=$(Write-Host \"Output from PS code in an EnvVars should not appear on packer console\")"
+      ],
+      "inline": "write-output \"...But it does because of the double quotes!\""
+    },
+    { "type": "powershell",
+      "environment_vars": [
+        "FOO=BARBAR"
       ],
       "scripts": [
         "files/ProgPrefTest.ps1"
@@ -167,9 +190,6 @@
     { "type": "powershell",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
-      "environment_vars": [
-        "MOO=BAZ"
-      ],
       "scripts": [
         "files/ElevProgPrefTest.ps1"
       ]
