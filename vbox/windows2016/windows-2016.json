@@ -30,6 +30,7 @@
     "zero_free_space": "true",
 
     "packages": "7zip, packer, golang",
+    "path_target": "C:\\Foobar\\",
 
     "shutdown_command": "A:/PackerShutdown.bat",
     "shutdown_timeout": "30m"
@@ -178,6 +179,12 @@
         "FOO=$(Write-Host \"Output from PS code in an EnvVars should not appear on packer console\")"
       ],
       "inline": "write-output \"...But it does because of the double quotes!\""
+    },
+    { "type": "powershell",
+      "environment_vars": [
+        "PATH_TARGET={{user `path_target`}}"
+      ],
+      "inline": "write-output \"Testing quoted env var: PATH_TARGET is $env:PATH_TARGET\""
     },
     { "type": "powershell",
       "environment_vars": [
