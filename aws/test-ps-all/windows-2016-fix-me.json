@@ -57,7 +57,7 @@
         "write-output \"Fixer removed escape for dollar in VAR1:      $Env:VAR1\"",
         "write-output \"Fixer removed escape for backtick in VAR2:    $Env:VAR2\"",
         "write-output \"Fixer removed escape for singlequote in VAR3: $Env:VAR3\"",
-        "write-output \"Fixer removed escape for doulbequote in VAR4: $Env:VAR4\"",
+        "write-output \"Fixer removed escape for doublequote in VAR4: $Env:VAR4\"",
         "write-output \"Fixer does NOT fix dollar in VAR5 as this is expanded from user variable - we end up with extra escapes for backtick and dollar\""
       ]
     }
