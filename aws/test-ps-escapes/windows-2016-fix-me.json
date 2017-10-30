@@ -1,0 +1,63 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region":         "us-east-1",
+    "var4": "VAR4=A`$Dollar"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{ user `aws_access_key` }}",
+      "secret_key": "{{ user `aws_secret_key` }}",
+      "region": "{{ user `region` }}",
+      "instance_type": "t2.micro",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*Windows_Server-2016-English-Full-Base*",
+          "root-device-type": "ebs"
+        },
+        "most_recent": true,
+        "owners": "amazon"
+      },
+      "ami_name": "win2016-packer-demo-{{timestamp}}",
+      "user_data_file": "./bootstrap_win.txt",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_password": "Super$3cr3t!"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "Super`$3cr3t!",
+      "environment_vars": [
+        "FOO=BAR"
+      ],
+      "inline": "write-output \"The escaped dollar in the elevated_password should be now auto-escaped - fixer removes escape\""
+    },
+    { "type": "powershell",
+      "environment_vars": [
+        "FOO=`$(Write-Host \"We need to escape the dollar so that PowerShell does not execute the env var\")"
+      ],
+      "inline": "write-output \"The dollar in env var FOO will now be auto-escaped - fixer removes escape: $Env:FOO\""
+    },
+    {
+      "type": "powershell",
+      "environment_vars": [
+        "VAR1=A`$Dollar",
+        "VAR2=A``Backtick",
+        "VAR3=A`'SingleQuote",
+        "VAR4={{user `var4`}}"
+      ],
+      "inline": [
+        "write-output \"Fixer removed escape for dollar in VAR1:      $Env:VAR1\"",
+        "write-output \"Fixer removed escape for backtick in VAR2:    $Env:VAR2\"",
+        "write-output \"Fixer removed escape for singlequote in VAR3: $Env:VAR3\"",
+        "write-output \"Fixer does NOT fix dollar in VAR4 as this is expanded from user variable - we end up with extra escapes for backtick and dollar\""
+      ]
+    }
+  ]
+}
