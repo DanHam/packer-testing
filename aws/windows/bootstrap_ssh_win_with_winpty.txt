@@ -1,0 +1,183 @@
+<powershell>
+# Rough AWS bootstrap script:
+# * Configure a password for the Administrator
+# * Download and install Cygwin
+# * Configure SSH to allow Packer to connect using the specified user and key
+# * Download and install winpty
+# * Set winpty + PowerShell as the default Cygwin shell
+# * Configure the firewall to allow inbound SSH connections
+
+# Set administrator password
+net user Administrator SuperS3cr3t!
+wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
+
+# The ssh user and public key of the user we have configured Packer to
+# connect with
+$SSHUser = "Administrator"
+$SSHPubKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDHL7YEa3CXVSjYE2Msx5JTCe7z8e3WtER59aeYl9co1mUljR4xb427qCxbwW2D95mwds2/rQ2HdvV5gH1Y3SN6NQsu85X8LPgO2tnszkNkNjqi0JI4o/71wJ15gSOS3aA7iScj9Kvq6LdgDyEXTW+nyxNv5KWJr8jaRune3g/85rzHCihzIoiTH/dK3LyQdKd2FyujAQeGawexhgMkEKPfg85WE8GdpnolfWBtb94tyXjo21CKLbaGgTIXxqWLUpxnWgpMQlnCpp59UuShOxWbN+Usv7m0/cvAa22RJbidIzRIls3XQBIP8S8oayhW/TXfBLZ1rzK52JkFpyxM0qvlZuqLjwYJZQBp8+o9qot1UXnIFm0c62O8NoQGGcnE/hE71pUSmGxscy5uBlAIDP+Km1G7BIXCoL3KCXb06op4XJNPoqRYzVjREgNlFejKzLp+5TgPC6O4uKelAP5CdJCTPdvhwZtQ7vtS4UfbxTbHc4392y5+Zt8dNmRaKtgpqVkaqqzBf7yBlvbgROK3RJMG7oAszNOKIKH07bol9o+/t3JrdSgBaiYE6vNLJUzx3tSmnD1fLL1ZzyVnElFkrsoHwYBtlnnGqC6K3IlvtnkmPHL4bM68a0FhpRTsg+NMtUvZhYjoDZRBx5bgRHptIHT7QeICc7TcaRx1aKRqoPF9tw== neos@neos-infrastructure.com"
+
+function Dos2Unix {
+    param ([string]$FilePath)
+    $dos2unix = [io.file]::ReadAllText($FilePath) -replace "`r`n","`n"
+    [io.file]::WriteAllText($FilePath, $dos2unix)
+}
+
+# Download Cygwin
+Write-Host "Downloading the Cygwin setup utility..."
+$CygwinUrl = "https://cygwin.com/setup-x86_64.exe"
+$CygwinExe = "${Env:Temp}\cygwin-installer.exe"
+$wc = New-Object System.Net.WebClient
+$wc.DownloadFile($CygwinUrl, $CygwinExe)
+Write-Host "Complete"
+
+# Set Cygwin Install parameters
+Write-Host "Installing Cygwin..."
+$CygwinHome = "${Env:SYSTEMDRIVE}\cygwin"
+If ( [Environment]::Is64BitOperatingSystem ) {
+    $CygwinArch = "x86_64"
+} else {
+    $CygwinArch = "x86"
+}
+$CygwinLocalPackages = "${Env:SYSTEMDRIVE}\cygwin_packages"
+$CygwinPackages = "openssh,bash-completion,mintty,wget,tree"
+$CygwinMirrorSite = "http://mirrors.kernel.org/sourceware/cygwin"
+$CygwinInstallParameters = "--arch $CygwinArch --quiet-mode --root $CygwinHome --packages $CygwinPackages --local-package-dir $CygwinLocalPackages --site $CygwinMirrorSite --no-desktop"
+
+# Install Cygwin
+Start-Process $CygwinExe $CygwinInstallParameters -Wait
+Write-Host "Complete"
+
+
+# Configure SSH and set up access for the required user
+Write-Host "Configuring SSH and setting up authorised user keys..."
+# This makes use of the ssh-host-config utility provided as part of the
+# openssh package. The util expects to be run from within a Cygwin terminal
+# since it depends on a number of environment variables that are configured
+# and set when the Cygwin environment is initialised. As such we to need to
+# chain together a command to start up a tty running bash that will run our
+# configuration script.
+# Unfortunately, Cygwin fails to set a value for the 'LOGONSERVER'
+# environment variable - this is presumably because of the early stage at
+# which the AWS User Data script is run. Unfortunately this causes a number
+# of problems as the helper scripts we are using assume that this value is
+# set. The scripts make a number of decisions regarding the name and set up
+# of the priviliged user account that the ssh server service is to run under
+# based on this value - see the csih_select_priviliged_username function
+# within the cygwin-service-installation-helper.sh script.
+# If the value is not set we end up with an plethora of errors setting up
+# the account with the end result being a baulked and inoperable ssh server
+# installation.
+# We want a single directory for the user home rather than separate
+# Windows and *nix/Cygwin home directories (which is the default).
+# Since the profile folder name does not necessarily have to be related to
+# the username, the only 100% reliable method is to look up the user profile
+# folder using the SID
+$objUser = New-Object System.Security.Principal.NTAccount($SSHUser)
+$strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier]).Value
+$ProfileFolder = (Get-WmiObject Win32_UserProfile | `
+                  Select-Object SID,LocalPath | `
+                  where {$_.SID -eq $strSID}).LocalPath
+$SSHConfigScript = "${Env:Temp}/ssh-config-script.sh"
+
+# Create our script
+Write-Output @"
+# Set a value for the missing LOGONSERVER environment variable
+export LOGONSERVER="\\\\`${COMPUTERNAME}"
+# Run the provided ssh configuration script accepting defaults and set a
+# password for the account under which the ssh server service is to run.
+# By default the account is named cyg_server. The password is arbitrarily
+# complex to meet with Windows password complexity requirements, not for
+# any security benefit. 'Deny log on locally' and 'Deny log on through
+# Remote Desktop Services' are automatically set for us by the configuration
+# script on the cyg_server account.
+ssh-host-config --yes --pwd Hn4SDc39fh16
+# Convert the path for the user profile folder to a Cygwin compatible path
+SSHUSERHOME=`"`$(cygpath --unix '$ProfileFolder')`"
+SSHUSERDOTDIR=`"`$SSHUSERHOME/.ssh`"
+SSHUSERAUTH=`"`$SSHUSERDOTDIR/authorized_keys`"
+# Set up passwordless/key based access
+mkdir -p `$SSHUSERDOTDIR
+echo $SSHPubKey > `$SSHUSERAUTH
+# The config utility above sets 'StrictModes' by default - meaning that
+# permissions and ownerships need to be set up correctly for ssh to allow
+# the connection. Unfortunately, 'StrictModes' does not work well when
+# using the Windows profile folder as the users Cygwin home. This is
+# because SYSTEM has group ownership and rwx permissions on this directory.
+# This _can_ be 'fixed' by setting group permissions to r-x only. However,
+# it's probably best not to mess with the default windows permissions for
+# this folder, so instead turn StrictModes off.
+sed -i -e '/StrictModes/ s/^#//' -e '/StrictModes/ s/yes/no/i' /etc/sshd_config
+# Configure Cywin to use the Windows user profile folder as the users home
+sed -i '/^db_home/ d' /etc/nsswitch.conf # Delete existing entries
+echo `"db_home: windows`" >> /etc/nsswitch.conf
+"@ > $SSHConfigScript
+
+# Convert line endings or bash won't be able to read the file
+Dos2Unix $SSHConfigScript
+
+# We need to run bash and our bash script within a TTY...
+$Mintty = "$CygwinHome\bin\mintty.exe"
+$MinttyParameters = "--window hide --hold never --dir $CygwinHome --rootfs $CygwinHome --exec"
+# and run bash as a login shell so the environment is set up properly for us
+$BashShell = "/usr/bin/bash -l"
+
+# Chain together all the required bits to and execute the script
+Start-Process $Mintty -ArgumentList $MinttyParameters, $BashShell, $SSHConfigScript -Wait
+Write-Host "Complete"
+
+# Download, install and configure winpty and set winpty + powershell as the default shell
+Write-Host "Downloading and installing winpty and setting winpty + PowerShell as the default Cygwin shell..."
+If ( "$CygwinArch" -eq "x86" ) {
+    $WinptyURL = "https://github.com/rprichard/winpty/releases/download/0.4.3/winpty-0.4.3-cygwin-2.8.0-ia32.tar.gz"
+} else {
+    $WinptyURL = "https://github.com/rprichard/winpty/releases/download/0.4.3/winpty-0.4.3-cygwin-2.8.0-x64.tar.gz"
+}
+
+# Create our script
+$WinptySetupScript = "$CygwinHome/tmp/winpty-setup.sh"
+Write-Output @"
+# Grab the default filename and set the location for the download
+WINPTYARCHIVE=`"/tmp/`$(basename $WinptyURL)`"
+# wget should have been installed as one of our Cygwin packages...
+wget --quiet --tries=3 $WinptyURL --output-document=`${WINPTYARCHIVE}
+# Get the top level directory from the archive
+WINPTYTLD=`"`$(tar tzf `${WINPTYARCHIVE} | head -n1 | sed 's/\/$//g')`"
+# Extract the contents of the archive
+tar xzf `${WINPTYARCHIVE} -C `$TMP
+# Copy all files in the archives bin directory to Cygwin's bin directory
+find `$TMP/`$WINPTYTLD/bin -type f -exec cp '{}' /bin/ \;
+# Create required winpty/powershell start up configuration
+printf `"%s`" `"\
+@ECHO OFF
+$CygwinHome\bin\winpty.exe powershell
+`" > /bin/winpty-powershell.bat
+chmod 755 /bin/winpty-powershell.bat
+# Set winpty/powershell as the default shell
+sed -i '/^db_shell/ d' /etc/nsswitch.conf # Delete existing entries
+echo `"db_shell: /bin/winpty-powershell.bat`" >> /etc/nsswitch.conf
+# Clean up
+rm -rf `$TMP/winpty*
+"@ > $WinptySetupScript
+
+# Convert line endings
+Dos2Unix $WinptySetupScript
+
+# Chain together all the required bits to and execute the script
+Start-Process $Mintty -ArgumentList $MinttyParameters, $BashShell, $WinptySetupScript -Wait
+Write-Host "Complete"
+
+
+# Start the SSH server
+Write-Host "Starting the SSH server"
+Start-Service -Name sshd
+Write-Host "Complete"
+
+# Configure the firewall to allow inbound ssh connections
+Write-Host "Configuring the firewall to allow inbound ssh connections"
+netsh advfirewall firewall add rule name="ssh" dir=in action=allow program="C:\cygwin\usr\sbin\sshd.exe" enable=yes protocol=TCP localport=22 remoteport=any localip=any remoteip=any | Out-Null
+Write-Host "Complete"
+
+# Clean up
+rm -Force -Path $CygwinExe # Delete the installer
+rm -Force -Path $SSHConfigScript # Delete our config script
+</powershell>
