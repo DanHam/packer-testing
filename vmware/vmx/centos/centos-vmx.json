@@ -1,0 +1,40 @@
+{
+  "variables": {
+    "template": "centos-7-x86_64"
+  },
+
+  "builders": [
+    {
+      "type": "vmware-vmx",
+      "communicator": "ssh",
+      "headless": true,
+
+      "source_path": "./output-centos-74-x86_64-vmware-iso/centos-74-x86_64-vmware-iso.vmx",
+
+      "vm_name": "{{user `template`}}",
+
+      "vmx_data": {
+        "memsize": "1024",
+        "numvcpus": "1"
+      },
+
+      "ssh_username": "coadmin",
+      "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "KUNG=foo"
+      ],
+      "inline": [
+        "echo \"The value of KUNG is $KUNG\""
+      ]
+    }
+  ]
+}
