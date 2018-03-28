@@ -1,0 +1,72 @@
+{
+  "variables": {
+    "template": "windows2016"
+  },
+
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+
+      "source_path": "./output-windows2016-virtualbox-iso/windows2016-virtualbox-iso.ovf",
+
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "2048"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"],
+        ["modifyvm", "{{.Name}}", "--vram", "128"],
+        ["modifyvm", "{{.Name}}", "--audio", "none"],
+        ["modifyvm", "{{.Name}}", "--usb", "off"],
+        ["setextradata", "global", "GUI/SuppressMessages", "all"]
+      ],
+      "export_opts": [
+        "--ovf20"
+      ],
+      "guest_additions_mode": "attach",
+
+      "communicator": "winrm",
+      "winrm_use_ssl": "false",
+      "winrm_insecure": "true",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "winrm_timeout": "1h",
+
+      "vm_name": "{{user `template`}}",
+      "headless": false,
+      "skip_export": true,
+
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "powershell",
+      "environment_vars": ["DEVOPS_LIFE_IMPROVER=PACKER"],
+      "inline": [
+        "Write-Host \"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\"",
+        "Write-Host \"You need to use backtick escapes when using\"",
+        "Write-Host \"characters such as DOLLAR`$ directly in a command\"",
+        "Write-Host \"or in your own scripts.\""
+      ]
+    },
+    {
+      "script": "./files/SampleScript.ps1",
+      "type": "powershell",
+      "environment_vars": [
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote"
+      ]
+    },
+    { "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "MOO=BAZ"
+      ],
+      "scripts": [
+        "./files/ElevatedScriptTest.ps1"
+      ]
+    }
+  ]
+}
