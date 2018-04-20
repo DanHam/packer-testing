@@ -18,6 +18,8 @@
         "numvcpus": "1"
       },
 
+      "skip_compaction": "true",
+
       "ssh_username": "coadmin",
       "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
 
@@ -29,11 +31,12 @@
     {
       "type": "shell",
       "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
-      "environment_vars": [
-        "KUNG=foo"
-      ],
       "inline": [
-        "echo \"The value of KUNG is $KUNG\""
+        "echo \"Creating large file\"",
+        "dd if=/dev/zero of=/zero.txt bs=1024 count=$[1024*1024]",
+        "ls -lh /zero.txt",
+        "echo \"Deleting large file\"",
+        "rm -f /zero.txt"
       ]
     }
   ]
