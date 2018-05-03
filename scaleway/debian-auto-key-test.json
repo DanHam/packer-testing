@@ -14,8 +14,7 @@
     {
       "type": "shell",
       "inline": [
-        "echo \"I am $(whoami)\"",
-        "ls /"
+        "echo \"I am $(whoami) testing auto gen of the ssh key\""
       ]
     }
   ]

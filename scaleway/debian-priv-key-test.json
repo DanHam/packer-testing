@@ -15,7 +15,7 @@
     {
       "type": "shell",
       "inline": [
-        "echo \"I am $(whoami)\""
+        "echo \"I am $(whoami) testing use of an existing ssh key\""
       ]
     }
   ]
