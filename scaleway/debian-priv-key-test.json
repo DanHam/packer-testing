@@ -1,0 +1,22 @@
+{
+  "builders": [
+    {
+      "type": "scaleway",
+      "ssh_username": "root",
+      "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+      "region": "par1",
+      "commercial_type": "vc1s",
+      "server_name": "debian",
+      "image": "abf9e3a2-7171-4764-91ef-57f30b21193d"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "echo \"I am $(whoami)\""
+      ]
+    }
+  ]
+}
