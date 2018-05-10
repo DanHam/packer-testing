@@ -65,7 +65,7 @@
         "MOO=BAZ"
       ],
       "scripts": [
-        "./ElevatedScriptTest.ps1"
+        "./scripts/ElevatedScriptTest.ps1"
       ]
     }
   ]
