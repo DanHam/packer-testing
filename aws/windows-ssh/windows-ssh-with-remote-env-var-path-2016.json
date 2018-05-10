@@ -21,10 +21,10 @@
         "owners": "amazon"
       },
       "ami_name": "win2016-packer-demo-{{timestamp}}",
-      "user_data_file": "./bootstrap_ssh_win.txt",
+      "user_data_file": "./bootstrap_cygwin_ssh_win.txt",
       "communicator": "ssh",
       "ssh_username": "Administrator",
-      "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+      "ssh_private_key_file": "./insecure.id_rsa",
       "ssh_timeout": "15m"
     }
   ],
@@ -50,7 +50,7 @@
         "VAR3=A'SingleQuote",
         "VAR4=A\"DoubleQuote"
       ],
-      "script": "./sample_script.ps1"
+      "script": "./StandardScriptTest.ps1"
     },
     { "type": "powershell",
       "elevated_user": "Administrator",
@@ -58,13 +58,10 @@
       "environment_vars": [
         "MOO=BAZ"
       ],
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
       "scripts": [
         "./ElevatedScriptTest.ps1"
       ]
-    },
-    {
-      "type": "windows-shell",
-      "script": "./sleep.bat"
     }
   ]
 }
