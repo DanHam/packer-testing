@@ -39,9 +39,6 @@
       ]
     },
     {
-      "type": "windows-restart"
-    },
-    {
       "script": "./scripts/StandardScriptTest.ps1",
       "type": "powershell",
       "environment_vars": [
