@@ -1,0 +1,182 @@
+{
+  "variables": {
+    "template": "centos-74-x86_64",
+    "guest_os_type": "centos-64",
+
+    "debug": "false",
+    "headless": "true",
+
+    "iso_url": "/Users/dan/stuff/iso/os/centos/centos7x86_64/CentOS-7-x86_64-DVD-1708.iso",
+    "iso_checksum": "ec7500d4b006702af6af023b1f8f1b890b6c7ee54400bb98cef968b883cd6546",
+    "iso_checksum_type": "sha256",
+
+    "installer_boot_time": "5s",
+
+    "hardware_version": "9",
+    "memory_size": "1024",
+    "cpu_count": "1",
+    "disk_size": "10240",
+    "vmtools_iso_path": "/tmp/vmware-tools.iso",
+
+    "ssh_username": "packer",
+    "ssh_private_key": "./insecure.id_rsa",
+
+    "shutdown_command": "sudo /sbin/poweroff",
+
+    "admin_create": "true",
+    "admin_user": "coadmin",
+    "admin_group": "coadmin",
+    "admin_uid": "1000",
+    "admin_gid": "1000",
+    "admin_groups": "wheel",
+    "admin_shell": "/bin/bash",
+    "admin_gecos": "CentOS Administrator",
+    "admin_ssh_authorised_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDHL7YEa3CXVSjYE2Msx5JTCe7z8e3WtER59aeYl9co1mUljR4xb427qCxbwW2D95mwds2/rQ2HdvV5gH1Y3SN6NQsu85X8LPgO2tnszkNkNjqi0JI4o/71wJ15gSOS3aA7iScj9Kvq6LdgDyEXTW+nyxNv5KWJr8jaRune3g/85rzHCihzIoiTH/dK3LyQdKd2FyujAQeGawexhgMkEKPfg85WE8GdpnolfWBtb94tyXjo21CKLbaGgTIXxqWLUpxnWgpMQlnCpp59UuShOxWbN+Usv7m0/cvAa22RJbidIzRIls3XQBIP8S8oayhW/TXfBLZ1rzK52JkFpyxM0qvlZuqLjwYJZQBp8+o9qot1UXnIFm0c62O8NoQGGcnE/hE71pUSmGxscy5uBlAIDP+Km1G7BIXCoL3KCXb06op4XJNPoqRYzVjREgNlFejKzLp+5TgPC6O4uKelAP5CdJCTPdvhwZtQ7vtS4UfbxTbHc4392y5+Zt8dNmRaKtgpqVkaqqzBf7yBlvbgROK3RJMG7oAszNOKIKH07bol9o+/t3JrdSgBaiYE6vNLJUzx3tSmnD1fLL1ZzyVnElFkrsoHwYBtlnnGqC6K3IlvtnkmPHL4bM68a0FhpRTsg+NMtUvZhYjoDZRBx5bgRHptIHT7QeICc7TcaRx1aKRqoPF9tw== neos@neos-infrastructure.com",
+
+    "selinux_relabel": "false",
+
+    "skip_compaction": "true",
+
+    "packer_dir": "/packer",
+
+    "zero_script_upload_path": "/tmp/zero-free-space.sh"
+  },
+
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "http_directory": "http",
+      "communicator": "ssh",
+      "output_directory": "output-{{user `template`}}-{{build_name}}",
+      "headless": "{{user `headless`}}",
+
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+
+      "boot_command": [
+        "<tab> <wait>",
+        "text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg <wait>",
+        "<enter> <wait>"
+      ],
+      "boot_wait": "{{user `installer_boot_time`}}",
+
+      "version": "{{user `hardware_version`}}",
+      "guest_os_type": "{{user `guest_os_type`}}",
+      "vmx_data": {
+        "displayName": "Packer-{{user `template`}}-{{build_name}}",
+        "memsize": "{{user `memory_size`}}",
+        "numvcpus": "{{user `cpu_count`}}",
+        "cpuid.coresPerSocket": "1",
+        "mks.enable3d": "FALSE",
+        "serial0.present": "FALSE",
+        "sound.present": "FALSE",
+        "floppy0.present": "FALSE",
+        "usb.present": "FALSE",
+        "usb.vbluetooth.startConnected": "FALSE"
+      },
+      "vm_name": "{{user `template`}}-{{build_name}}",
+      "vmdk_name": "{{user `template`}}-{{build_name}}",
+      "disk_type_id": "0",
+      "disk_size": "{{user `disk_size`}}",
+      "disk_additional_size": ["100", "200"],
+      "tools_upload_flavor": "linux",
+      "tools_upload_path": "{{user `vmtools_iso_path`}}",
+
+      "skip_compaction": "false",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key`}}",
+
+      "shutdown_command": "{{user `shutdown_command`}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}"
+      ],
+      "inline": [
+        "mkdir --mode=777 $PACKER_DIR"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{user `packer_dir`}}",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/00-remove-extraneous-packages.sh",
+        "scripts/03-disable-system-beep.sh",
+        "scripts/04-configure-ssh.sh",
+        "scripts/05-centos-systemd-fixes.sh",
+        "scripts/06-configure-chrony.sh",
+        "scripts/07-configure-timedate-settings.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{user `packer_dir`}}",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "ADMIN_CREATE={{user `admin_create`}}",
+        "ADMIN_USER={{user `admin_user`}}",
+        "ADMIN_GROUP={{user `admin_group`}}",
+        "ADMIN_UID={{user `admin_uid`}}",
+        "ADMIN_GID={{user `admin_gid`}}",
+        "ADMIN_GROUPS={{user `admin_groups`}}",
+        "ADMIN_SHELL={{user `admin_shell`}}",
+        "ADMIN_GECOS={{user `admin_gecos`}}",
+        "ADMIN_SSH_AUTHORISED_KEY={{user `admin_ssh_authorised_key`}}",
+        "SELINUX_RELABEL={{user `selinux_relabel`}}",
+        "VMTOOLS_ISO_PATH={{user `vmtools_iso_path`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+            "scripts/10-create-admin-user.sh",
+            "scripts/11-selinux.sh",
+            "scripts/20-install-open-vm-tools.sh",
+            "scripts/21-install-vmware-tools.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}"
+      ],
+      "inline": [
+        "rm -rf $PACKER_DIR"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/zero-free-space.sh",
+      "destination": "{{user `zero_script_upload_path`}}"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "ZERO_SCRIPT_UPLOAD_PATH={{user `zero_script_upload_path`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/90-create-zero-free-space-unit-file.sh"
+      ]
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "vagrantfile_template": "files/Vagrantfile.vmware",
+      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
+    }
+  ]
+}
