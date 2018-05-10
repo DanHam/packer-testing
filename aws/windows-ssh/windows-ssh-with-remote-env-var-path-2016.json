@@ -33,7 +33,7 @@
       "type": "powershell",
       "remote_path": "c:/windows/temp/ps-script.ps1",
       "remote_env_var_path": "c:/windows/temp/ps-env-vars.ps1",
-      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. c:/windows/temp/ps-env-vars.ps1; &'c:/windows/temp/ps-script.ps1'; exit \\$LastExitCode }\"",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
       "inline": [
         "Write-Host \"Hello. This is a std powershell without any user\"",
         "Write-Host \"environment variables defined.\""
@@ -43,7 +43,7 @@
       "type": "powershell",
       "remote_path": "c:/windows/temp/ps-script.ps1",
       "remote_env_var_path": "c:/windows/temp/ps-env-vars.ps1",
-      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. c:/windows/temp/ps-env-vars.ps1; &'c:/windows/temp/ps-script.ps1'; exit \\$LastExitCode }\"",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
       "environment_vars": [
         "VAR1=A$Dollar",
         "VAR2=A`Backtick",
@@ -53,12 +53,14 @@
       "script": "./StandardScriptTest.ps1"
     },
     { "type": "powershell",
+      "remote_path": "c:/windows/temp/ps-script.ps1",
+      "remote_env_var_path": "c:/windows/temp/ps-env-vars.ps1",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
       "elevated_user": "Administrator",
       "elevated_password": "SuperS3cr3t!",
       "environment_vars": [
         "MOO=BAZ"
       ],
-      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
       "scripts": [
         "./ElevatedScriptTest.ps1"
       ]
