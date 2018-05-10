@@ -1,2 +1,2 @@
 @echo off
-echo "Hello from your simple_shell.bat script"
+echo "Hello from your SimpleShell.bat script"

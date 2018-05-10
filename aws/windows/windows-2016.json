@@ -21,7 +21,7 @@
         "owners": "amazon"
       },
       "ami_name": "win2016-packer-demo-{{timestamp}}",
-      "user_data_file": "./bootstrap_win.txt",
+      "user_data_file": "./bootstrap/BootstrapWin.txt",
       "communicator": "winrm",
       "winrm_username": "Administrator",
       "winrm_password": "SuperS3cr3t!"
@@ -36,7 +36,7 @@
     },
     {
       "type": "windows-shell",
-      "script": "./sample_script.bat"
+      "script": "./scripts/SimpleShell.bat"
     },
     {
       "type": "powershell",
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "script": "./sample_script.ps1",
+      "script": "./scripts/StandardScriptTest.ps1",
       "type": "powershell",
       "environment_vars": [
         "VAR1=A$Dollar",
