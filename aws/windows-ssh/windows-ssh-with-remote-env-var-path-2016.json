@@ -21,10 +21,10 @@
         "owners": "amazon"
       },
       "ami_name": "win2016-packer-demo-{{timestamp}}",
-      "user_data_file": "./bootstrap_cygwin_ssh_win.txt",
+      "user_data_file": "./bootstrap/BootstrapCygwinSshWin.txt",
       "communicator": "ssh",
       "ssh_username": "Administrator",
-      "ssh_private_key_file": "./insecure.id_rsa",
+      "ssh_private_key_file": "./keys/insecure.id_rsa",
       "ssh_timeout": "15m"
     }
   ],
@@ -50,7 +50,7 @@
         "VAR3=A'SingleQuote",
         "VAR4=A\"DoubleQuote"
       ],
-      "script": "./StandardScriptTest.ps1"
+      "script": "./scripts/StandardScriptTest.ps1"
     },
     { "type": "powershell",
       "remote_path": "c:/windows/temp/ps-script.ps1",
@@ -62,7 +62,7 @@
         "MOO=BAZ"
       ],
       "scripts": [
-        "./ElevatedScriptTest.ps1"
+        "./scripts/ElevatedScriptTest.ps1"
       ]
     }
   ]
