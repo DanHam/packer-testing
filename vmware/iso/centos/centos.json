@@ -91,10 +91,11 @@
       "vmdk_name": "{{user `template`}}-{{build_name}}",
       "disk_type_id": "0",
       "disk_size": "{{user `disk_size`}}",
+      "disk_additional_size": ["100", "200"],
       "tools_upload_flavor": "linux",
       "tools_upload_path": "{{user `vmtools_iso_path`}}",
 
-      "skip_compaction": "true",
+      "skip_compaction": "false",
 
       "ssh_username": "{{user `ssh_username`}}",
       "ssh_private_key_file": "{{user `ssh_private_key`}}",
