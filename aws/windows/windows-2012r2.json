@@ -2,7 +2,10 @@
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-    "region":         "eu-west-2"
+    "region":         "eu-west-2",
+
+    "clean_general": "true",
+    "optimise_win_volume": "true"
   },
   "builders": [
     {
@@ -39,16 +42,46 @@
       ]
     },
     {
-      "type": "windows-restart"
-    },
-    {
-      "script": "./scripts/StandardScriptTest.ps1",
       "type": "powershell",
       "environment_vars": [
         "VAR1=A$Dollar",
         "VAR2=A`Backtick",
         "VAR3=A'SingleQuote",
         "VAR4=A\"DoubleQuote"
+      ],
+      "script": "./scripts/StandardScriptTest.ps1"
+    },
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "SuperS3cr3t!",
+      "environment_vars": [
+        "FOO=bar"
+      ],
+      "scripts": [
+        "./scripts/DotNetOptimizationSpeedUp.ps1"
+      ]
+    },
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "SuperS3cr3t!",
+      "environment_vars": [
+        "CLEAN_GENERAL={{user `clean_general`}}"
+      ],
+      "scripts": [
+        "./scripts/CleanGeneral.ps1"
+      ]
+    },
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "SuperS3cr3t!",
+      "environment_vars": [
+        "OPTIMISE_WIN_VOLUME={{user `optimise_win_volume`}}"
+      ],
+      "scripts": [
+        "./scripts/OptimiseWindowsVolume.ps1"
       ]
     }
   ]
