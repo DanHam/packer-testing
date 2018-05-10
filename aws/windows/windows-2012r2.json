@@ -23,7 +23,7 @@
         "most_recent": true,
         "owners": "amazon"
       },
-      "ami_name": "packer-demo-{{timestamp}}",
+      "ami_name": "windows2012r2-packer-demo-{{timestamp}}",
       "user_data_file": "./bootstrap/BootstrapWin.txt",
       "communicator": "winrm",
       "winrm_username": "Administrator",
