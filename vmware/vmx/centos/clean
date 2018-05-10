@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#
+# Clean packer build artifacts
+rm -rf output-vmware-vmx
