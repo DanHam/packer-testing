@@ -18,7 +18,7 @@
         "numvcpus": "1"
       },
 
-      "skip_compaction": "true",
+      "skip_compaction": "false",
 
       "ssh_username": "coadmin",
       "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
