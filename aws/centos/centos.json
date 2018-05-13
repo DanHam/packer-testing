@@ -1,0 +1,37 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region":         "eu-west-2"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{ user `aws_access_key` }}",
+      "secret_key": "{{ user `aws_secret_key` }}",
+      "region": "{{ user `region` }}",
+      "instance_type": "t2.micro",
+      "source_ami_filter": {
+        "filters": {
+          "product-code": "aw0evgkw8e5c1q413zgy5pjce"
+        },
+        "most_recent": true,
+        "owners": "679593333241"
+      },
+      "ami_name": "centos-packer-demo-{{timestamp}}",
+      "user_data_file": "./bootstrap/CentosCloudConfig.yml",
+      "communicator": "ssh",
+      "ssh_username": "coadmin",
+      "ssh_private_key_file": "./keys/insecure.id_rsa"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "inline": [
+        "echo \"Hello from $(whoami) on AWS EC2\""
+      ]
+    }
+  ]
+}
