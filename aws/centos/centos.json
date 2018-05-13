@@ -11,6 +11,8 @@
       "secret_key": "{{ user `aws_secret_key` }}",
       "region": "{{ user `region` }}",
       "instance_type": "t2.micro",
+      "spot_price": "auto",
+      "spot_price_auto_product": "Linux/UNIX",
       "source_ami_filter": {
         "filters": {
           "product-code": "aw0evgkw8e5c1q413zgy5pjce"
