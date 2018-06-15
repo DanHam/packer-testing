@@ -36,7 +36,7 @@
   "variables": {
     "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
     "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
-    "region": "eu-west-2",
+    "region": "us-west-1",
     "AMI_build_instance_type": "t2.micro"
   }
 }
