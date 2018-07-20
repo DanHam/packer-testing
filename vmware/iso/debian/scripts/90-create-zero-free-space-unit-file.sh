@@ -4,15 +4,24 @@
 # in preparation for disk defrag and shrink utilities provided by some
 # virtualisation platforms
 
-# Packer logging
-echo "Creating systemd unit file to run zero free space service..."
-
 UNIT_FILE_LOCATION="/etc/systemd/system/zero-free-space.service"
 UNIT="${UNIT_FILE_LOCATION##*/}"
 
 # The location of the script is specified in the Packer configuration
 # template and exported as an environment variable
 ZERO_SCRIPT_LOCATION="${ZERO_SCRIPT_UPLOAD_PATH}"
+
+# Exit if the option to skip zeroing out the filesystem has been set in the
+# template
+if [ "${SKIP_FS_ZEROING}" = true ]; then
+    echo "Skipping step to zero out file system as requested in template"
+    # Remove the zero script uploaded by Packer
+    rm -f ${ZERO_SCRIPT_LOCATION}
+    exit 0
+fi
+
+# Packer logging
+echo "Creating systemd unit file to run zero free space service..."
 
 # Write the unit file
 printf "%s" "\
