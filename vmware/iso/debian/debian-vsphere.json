@@ -1,0 +1,246 @@
+{
+  "variables": {
+    "template": "debian-94-x86_64",
+    "guest_os_type_vmware": "debian8-64",
+    "part_scheme": "std",
+
+    "debug": "false",
+    "headless": "true",
+
+    "iso_url": "file:///Users/dan/stuff/iso/os/debian/debian9.4x86_64/debian-9.4.0-amd64-netinst.iso",
+    "iso_checksum": "345c4e674dc10476e8c4f1571fbcdba4ce9788aa5584c5e2590ab3e89e7bb9acb370536f41a3ac740eb92b6aebe3cb8eb9734874dd1658c68875981b8351bc38",
+    "iso_checksum_type": "sha512",
+
+    "installer_boot_time": "15s",
+
+    "esxi_remote_host": "esx01.manage.localdomain",
+    "esxi_remote_username": "root",
+    "esxi_remote_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+    "esxi_remote_datastore": "vsanDatastore",
+
+    "vmware_hardware_version": "9",
+    "memory_size": "512",
+    "cpu_count": "1",
+    "disk_size": "10240",
+    "vmtools_shared_folders": "true",
+    "vmtools_shared_folders_fstab": "false",
+
+    "ssh_username": "packer",
+    "ssh_private_key": "/Users/dan/.ssh/neos.id_rsa",
+    "ssh_timeout": "30m",
+
+    "shutdown_command": "sudo /sbin/poweroff",
+
+    "admin_create": "true",
+    "admin_user": "debadmin",
+    "admin_group": "debadmin",
+    "admin_uid": "1000",
+    "admin_gid": "1000",
+    "admin_groups": "cdrom,floppy,sudo,audio,dip,video,plugdev,netdev",
+    "admin_shell": "/bin/bash",
+    "admin_gecos": "Debian Administrator",
+    "admin_ssh_authorised_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDHL7YEa3CXVSjYE2Msx5JTCe7z8e3WtER59aeYl9co1mUljR4xb427qCxbwW2D95mwds2/rQ2HdvV5gH1Y3SN6NQsu85X8LPgO2tnszkNkNjqi0JI4o/71wJ15gSOS3aA7iScj9Kvq6LdgDyEXTW+nyxNv5KWJr8jaRune3g/85rzHCihzIoiTH/dK3LyQdKd2FyujAQeGawexhgMkEKPfg85WE8GdpnolfWBtb94tyXjo21CKLbaGgTIXxqWLUpxnWgpMQlnCpp59UuShOxWbN+Usv7m0/cvAa22RJbidIzRIls3XQBIP8S8oayhW/TXfBLZ1rzK52JkFpyxM0qvlZuqLjwYJZQBp8+o9qot1UXnIFm0c62O8NoQGGcnE/hE71pUSmGxscy5uBlAIDP+Km1G7BIXCoL3KCXb06op4XJNPoqRYzVjREgNlFejKzLp+5TgPC6O4uKelAP5CdJCTPdvhwZtQ7vtS4UfbxTbHc4392y5+Zt8dNmRaKtgpqVkaqqzBf7yBlvbgROK3RJMG7oAszNOKIKH07bol9o+/t3JrdSgBaiYE6vNLJUzx3tSmnD1fLL1ZzyVnElFkrsoHwYBtlnnGqC6K3IlvtnkmPHL4bM68a0FhpRTsg+NMtUvZhYjoDZRBx5bgRHptIHT7QeICc7TcaRx1aKRqoPF9tw== neos@neos-infrastructure.com",
+
+    "packer_dir": "/packer",
+    "apt_install_recommends": "true",
+    "packer_virt_sysprep_dir": "/packer-virt-sysprep",
+    "packer_virt_sysprep_defer_run": "false",
+    "sysprep_op_bash_history": "true",
+    "sysprep_op_crash_data":   "true",
+    "sysprep_op_dhcp_client_state": "true",
+    "sysprep_op_firewall_rules": "true",
+    "sysprep_op_logfiles": "true",
+    "sysprep_op_machine_id": "true",
+    "sysprep_op_mail_spool": "true",
+    "sysprep_op_package_manager_cache": "true",
+    "sysprep_op_rpm_db": "false",
+    "sysprep_op_ssh_hostkeys": "true",
+    "sysprep_op_tmp_files": "true",
+    "sysprep_op_yum_uuid": "false",
+
+    "zero_script_upload_path": "/tmp/zero-free-space.sh"
+
+  },
+
+  "builders": [
+    {
+      "name": "vmware-iso-vsphere",
+      "type": "vmware-iso",
+      "communicator": "ssh",
+      "output_directory": "output-{{user `template`}}-{{user `part_scheme`}}-{{build_name}}",
+      "headless": "{{user `headless`}}",
+
+      "remote_type": "esx5",
+      "remote_host": "{{user `esxi_remote_host`}}",
+      "remote_username": "{{user `esxi_remote_username`}}",
+      "remote_private_key_file": "{{user `esxi_remote_private_key_file`}}",
+      "remote_datastore": "{{user `esxi_remote_datastore`}}",
+      "keep_registered": true,
+      "vnc_disable_password": true,
+
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "auto <wait>",
+        "url=http://packer-http.s3-website.eu-west-2.amazonaws.com/debian/preseed-{{user `part_scheme`}}.cfg <wait>",
+        "debian-installer=en_GB <wait>",
+        "locale=en_GB <wait>",
+        "keymap=uk <wait>",
+        "hostname=localhost <wait>",
+        "domain=localdomain <wait>",
+        "<enter>"
+      ],
+      "boot_wait": "{{user `installer_boot_time`}}",
+
+      "version": "{{user `vmware_hardware_version`}}",
+      "guest_os_type": "{{user `guest_os_type_vmware`}}",
+      "vmx_data": {
+        "displayName": "Packer-{{user `template`}}-{{user `part_scheme`}}-{{build_name}}",
+        "memsize": "{{user `memory_size`}}",
+        "numvcpus": "{{user `cpu_count`}}",
+        "cpuid.coresPerSocket": "1",
+        "mks.enable3d": "FALSE",
+        "serial0.present": "FALSE",
+        "sound.present": "FALSE",
+        "floppy0.present": "FALSE",
+        "usb.present": "FALSE",
+        "usb.vbluetooth.startConnected": "FALSE",
+        "ethernet0.virtualDev": "vmxnet3",
+        "ethernet0.present": "TRUE",
+        "ethernet0.addressType": "generated",
+        "ethernet0.startConnected": "TRUE",
+        "ethernet0.dvs.portgroupId": "dvportgroup-55",
+        "ethernet0.dvs.switchId": "50 0b 04 db 81 66 35 5e-13 7c 09 fb 38 5e 08 93"
+      },
+      "vm_name": "{{user `template`}}-{{user `part_scheme`}}-{{build_name}}",
+      "vmdk_name": "{{user `template`}}-{{user `part_scheme`}}-{{build_name}}",
+      "disk_type_id": "thin",
+      "disk_size": "{{user `disk_size`}}",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key`}}",
+      "ssh_wait_timeout": "{{user `ssh_timeout`}}",
+
+      "shutdown_command": "{{user `shutdown_command`}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}",
+        "PACKER_VIRT_SYSPREP_DIR={{user `packer_virt_sysprep_dir`}}"
+      ],
+      "inline": [
+        "mkdir --mode=777 $PACKER_DIR",
+        "mkdir --mode=777 $PACKER_VIRT_SYSPREP_DIR"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/packer-virt-sysprep/",
+      "destination": "{{user `packer_virt_sysprep_dir`}}"
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{user `packer_dir`}}",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "ADMIN_CREATE={{user `admin_create`}}",
+        "ADMIN_USER={{user `admin_user`}}",
+        "ADMIN_GROUP={{user `admin_group`}}",
+        "ADMIN_UID={{user `admin_uid`}}",
+        "ADMIN_GID={{user `admin_gid`}}",
+        "ADMIN_GROUPS={{user `admin_groups`}}",
+        "ADMIN_SHELL={{user `admin_shell`}}",
+        "ADMIN_GECOS={{user `admin_gecos`}}",
+        "ADMIN_SSH_AUTHORISED_KEY={{user `admin_ssh_authorised_key`}}",
+        "VMTOOLS_SHARED_FOLDERS={{user `vmtools_shared_folders`}}",
+        "VMTOOLS_SHARED_FOLDERS_FSTAB={{user `vmtools_shared_folders_fstab`}}",
+        "APT_INSTALL_RECOMMENDS={{user `apt_install_recommends`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/00-grub-config.sh",
+        "scripts/01-disable-system-beep.sh",
+        "scripts/02-configure-ssh.sh",
+        "scripts/03-configure-chrony.sh",
+        "scripts/04-configure-timedate-settings.sh",
+        "scripts/05-debian-fix-mesg-n-when-not-tty.sh",
+        "scripts/06-debian-fix-console-setup-keyboard.sh",
+        "scripts/10-create-admin-user.sh",
+        "scripts/20-install-open-vm-tools.sh",
+        "scripts/21-open-vm-tools-config-shared-folders.sh",
+        "scripts/30-remove-old-kernels.sh",
+        "scripts/31-set-apt-install-recommends.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{user `packer_dir`}}",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "PACKER_VIRT_SYSPREP_DEFER_RUN={{user `packer_virt_sysprep_defer_run`}}",
+        "PACKER_VIRT_SYSPREP_DIR={{user `packer_virt_sysprep_dir`}}",
+        "SYSPREP_OP_BASH_HISTORY={{user `sysprep_op_bash_history`}}",
+        "SYSPREP_OP_CRASH_DATA={{user `sysprep_op_crash_data`}}",
+        "SYSPREP_OP_DHCP_CLIENT_STATE={{user `sysprep_op_dhcp_client_state`}}",
+        "SYSPREP_OP_FIREWALL_RULES={{user `sysprep_op_firewall_rules`}}",
+        "SYSPREP_OP_LOGFILES={{user `sysprep_op_logfiles`}}",
+        "SYSPREP_OP_MACHINE_ID={{user `sysprep_op_machine_id`}}",
+        "SYSPREP_OP_MAIL_SPOOL={{user `sysprep_op_mail_spool`}}",
+        "SYSPREP_OP_PACKAGE_MANAGER_CACHE={{user `sysprep_op_package_manager_cache`}}",
+        "SYSPREP_OP_RPM_DB={{user `sysprep_op_rpm_db`}}",
+        "SYSPREP_OP_SSH_HOSTKEYS={{user `sysprep_op_ssh_hostkeys`}}",
+        "SYSPREP_OP_TMP_FILES={{user `sysprep_op_tmp_files`}}",
+        "SYSPREP_OP_YUM_UUID={{user `sysprep_op_yum_uuid`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/80-create-packer-virt-sysprep-unit-file.sh",
+        "scripts/81-create-packer-virt-sysprep-run-control-script.sh",
+        "scripts/82-create-remove-packer-user-unit-file.sh"
+      ]
+   },
+   {
+      "type": "shell",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "inline": [
+        "rm -rf $PACKER_DIR"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "scripts/zero-free-space.sh",
+      "destination": "{{user `zero_script_upload_path`}}"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "ZERO_SCRIPT_UPLOAD_PATH={{user `zero_script_upload_path`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/90-create-zero-free-space-unit-file.sh"
+      ]
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "vagrantfile_template": "files/Vagrantfile.vmware",
+      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
+    }
+  ]
+}
