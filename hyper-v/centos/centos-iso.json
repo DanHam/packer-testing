@@ -18,6 +18,7 @@
     "admin_gecos": "CentOS Administrator",
     "admin_ssh_authorised_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDY67BeAmBU4I5fvT3hdqrVsXCA7jaq5mVdkaaCHjIOBSpFAXAGha/TUDLC6n2+NtOmcOYjWR7P+48I74TVe/4ZkuSnyg9R63Jng5FsuOlJBoz8obl5F6qVvMnP+Q6BLmlnkmlcsZv35teI3I5WsYk4QaML7WHvuYjEykxEuCkOpvcC/UmlblMji5KAkW2gn+UQHTa5r2Ku441aLnaadKBrX2tqV8a6Q+nF382cOH2Gx6mqKPImNA4LmDdejXDRgz4XC3zkvqJyDhTC8CKAF4H0dssOmOtA0p3Q5sM+of1fper8rsmtegFPjGBVchiEd0Sazo3oStd1eKEIRWvMkoQyz649eDICORcOCV9HwlTIjLN4queQ0RY8l3pOwLl90RO1lAjqbODdBE7jcoG4JFeOEF4XH40df7aHSHKiNsDjZ+KK0nFEpndeX3ULa/1ZloZiaGtd6lGC31j7xpUA6MCSQ6RDg6Ev+Mo1nMT7A+gK5iVBLdi6b6aYAwDsWu8/VWMgRRj3tk/dMnuYwwiI0r6odzMaYMWSvh1CG5JExdDKxg+dJaecupZqZwJMJhfno+AgarGhnBt7vlMinRotvDufHLtfmyRkCTMl58q1Eg3AfdzXjWIc8cSjRhogIVbchZNYNyFk7i+kUjV/DsCUuS1QB9NuYoLSrm7O3N84M9tFRQ== InsecureKey",
 
+    "hvmac_script_upload_path": "/tmp/hyperv-correct-mac-addr.sh",
     "zero_script_upload_path": "/tmp/zero-free-space.sh"
 
   },
@@ -76,6 +77,21 @@
     },
     {
       "type": "file",
+      "source": "scripts/hyperv-correct-mac-addr.sh",
+      "destination": "{{user `hvmac_script_upload_path`}}"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "HVMAC_SCRIPT_UPLOAD_PATH={{user `hvmac_script_upload_path`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "scripts/80-create-hyperv-correct-mac-unit-file.sh"
+      ]
+    },
+    {
+      "type": "file",
       "source": "scripts/zero-free-space.sh",
       "destination": "{{user `zero_script_upload_path`}}"
     },
@@ -88,14 +104,6 @@
       "scripts": [
         "scripts/90-create-zero-free-space-unit-file.sh"
       ]
-    }
-  ],
-
-  "post-processors": [
-    {
-      "type": "vagrant",
-      "keep_input_artifact": true,
-      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
     }
   ]
 }
