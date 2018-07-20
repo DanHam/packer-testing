@@ -1,0 +1,41 @@
+{
+  "variables": {
+    "template": "centos-7-x86_64-vmcx"
+  },
+
+  "builders": [
+    {
+      "type": "hyperv-vmcx",
+      "communicator": "ssh",
+
+      "boot_wait": "20s",
+
+      "clone_from_vm_name": "CentOS7",
+      "clone_all_snapshots": true,
+
+      "vm_name": "{{user `template`}}",
+      "cpu": "1",
+      "ram_size": "1024",
+      "switch_name": "ExternalSwitch",
+
+      "temp_path": "F:/packer-build-root",
+      "output_directory": "F:/packer-vmcx-output/",
+      "ssh_username": "coadmin",
+      "ssh_private_key_file": "insecure.id_rsa",
+      "ssh_timeout": "1h",
+
+      "skip_export": true,
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'Hello World'"
+      ]
+    }
+  ]
+}
