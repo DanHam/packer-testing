@@ -3,7 +3,7 @@
     {
       "type": "scaleway",
       "ssh_username": "root",
-      "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+      "ssh_private_key_file": "/Users/dan/.ssh/id_rsa",
       "region": "par1",
       "commercial_type": "vc1s",
       "server_name": "debian",

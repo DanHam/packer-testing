@@ -21,7 +21,7 @@
       "skip_compaction": "false",
 
       "ssh_username": "coadmin",
-      "ssh_private_key_file": "/Users/dan/.ssh/neos.id_rsa",
+      "ssh_private_key_file": "/Users/dan/.ssh/id_rsa",
 
       "shutdown_command": "sudo /sbin/poweroff"
     }
