@@ -1,0 +1,111 @@
+{
+  "variables": {
+    "template": "debian-9-x86_64",
+
+    "debug": "false",
+    "headless": "false",
+
+    "cpu_count": "1",
+    "memory_size": "1024",
+    "video_ram_size": "16",
+
+    "ssh_username": "vagrant",
+    "ssh_private_key_file": "../../../common/keys/vagrant",
+
+    "packer_dir": "/packer",
+    "packer_virt_sysprep_dir": "/packer-virt-sysprep",
+    "zero_script_upload_path": "/tmp/zero-free-space.sh"
+  },
+
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+
+      "source_path": "./output-debian-9-x86_64-std-virtualbox-iso/debian-9-x86_64-virtualbox-iso.ovf",
+      "output_directory": "output-{{user `template`}}-{{build_name}}",
+
+      "vm_name": "{{user `template`}}-{{build_name}}",
+      "headless": "{{user `headless`}}",
+
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "{{user `memory_size`}}"],
+        ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpu_count`}}"],
+        ["modifyvm", "{{.Name}}", "--vram", "{{user `video_ram_size`}}"],
+        ["modifyvm", "{{.Name}}", "--audio", "none"],
+        ["modifyvm", "{{.Name}}", "--usb", "off"],
+        ["setextradata", "global", "GUI/SuppressMessages", "all"]
+      ],
+      "export_opts": [
+        "--ovf20"
+      ],
+
+      "communicator": "ssh",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key_file`}}",
+      "ssh_wait_timeout": "1h",
+
+      "guest_additions_mode": "disable",
+      "virtualbox_version_file": "",
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}",
+        "PACKER_VIRT_SYSPREP_DIR={{user `packer_virt_sysprep_dir`}}"
+      ],
+      "inline": [
+        "mkdir --mode=777 $PACKER_DIR",
+        "mkdir --mode=777 $PACKER_VIRT_SYSPREP_DIR"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./scripts/packer-virt-sysprep",
+      "destination": "{{user `packer_virt_sysprep_dir`}}"
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{user `packer_dir`}}",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "PACKER_VIRT_SYSPREP_DIR={{user `packer_virt_sysprep_dir`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "./scripts/80-create-packer-virt-sysprep-unit-file.sh",
+        "./scripts/81-create-packer-virt-sysprep-run-control-script.sh"
+      ]
+   },
+   {
+      "type": "shell",
+      "environment_vars": [
+        "PACKER_DIR={{user `packer_dir`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "inline": [
+        "rm -rf $PACKER_DIR"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./scripts/zero-free-space.sh",
+      "destination": "{{user `zero_script_upload_path`}}"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "ZERO_SCRIPT_UPLOAD_PATH={{user `zero_script_upload_path`}}"
+      ],
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "scripts": [
+        "./scripts/90-create-zero-free-space-unit-file.sh"
+      ]
+    }
+  ]
+}

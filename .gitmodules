@@ -1,0 +1,3 @@
+[submodule "vbox/ovf/debian/scripts/packer-virt-sysprep"]
+	path = vbox/ovf/debian/scripts/packer-virt-sysprep
+	url = https://github.com/DanHam/packer-virt-sysprep
