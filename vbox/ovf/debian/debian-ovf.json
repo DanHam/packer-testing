@@ -1,6 +1,6 @@
 {
   "variables": {
-    "template": "debian-9-x86_64-ovf",
+    "template": "debian-9-x86_64-test",
 
     "debug": "false",
     "headless": "false",
@@ -23,7 +23,8 @@
     "local_shell_binary": "/opt/local/bin/bash",
     "vagrantfile_base_dir": "vagrantfiles",
     "vagrantfile_filename_prefix": "Vagrantfile",
-    "vagrant_cloud_org": "foosite"
+    "vagrant_cloud_org": "foosite",
+    "vagrant_cloud_version": "0.1.0"
   },
 
   "builders": [
@@ -138,13 +139,21 @@
         "./scripts/post-processor/00-generate-box-vagrantfiles.sh"
       ]
     },
-    {
-      "type": "vagrant",
-      "keep_input_artifact": true,
-      "vagrantfile_template": "{{user `vagrantfile_base_dir`}}/{{user `template`}}/{{user `vagrantfile_filename_prefix`}}.{{build_type}}",
-      "vagrantfile_template_generated": true,
-      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
-    },
+    [
+      {
+        "type": "vagrant",
+        "keep_input_artifact": true,
+        "vagrantfile_template": "{{user `vagrantfile_base_dir`}}/{{user `template`}}/{{user `vagrantfile_filename_prefix`}}.{{build_type}}",
+        "vagrantfile_template_generated": true,
+        "output": "boxes/{{user `template`}}-{{.Provider}}.box"
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "{{user `vagrant_cloud_org`}}/{{user `template`}}",
+        "version": "{{user `vagrant_cloud_version`}}",
+        "no_release": true
+      }
+    ],
     {
       "type": "shell-local",
       "environment_vars": [
