@@ -1,6 +1,6 @@
 {
   "variables": {
-    "template": "debian-9-x86_64",
+    "template": "debian-9-x86_64-ovf",
 
     "debug": "false",
     "headless": "false",
@@ -9,12 +9,21 @@
     "memory_size": "1024",
     "video_ram_size": "16",
 
+    "communicator": "ssh",
     "ssh_username": "vagrant",
     "ssh_private_key_file": "../../../common/keys/vagrant",
 
     "packer_dir": "/packer",
     "packer_virt_sysprep_dir": "/packer-virt-sysprep",
-    "zero_script_upload_path": "/tmp/zero-free-space.sh"
+    "zero_script_upload_path": "/tmp/zero-free-space.sh",
+
+    "admin_user": "vagrant",
+    "admin_passwd": "vagrant",
+
+    "local_shell_binary": "/opt/local/bin/bash",
+    "vagrantfile_base_dir": "vagrantfiles",
+    "vagrantfile_filename_prefix": "Vagrantfile",
+    "vagrant_cloud_org": "foosite"
   },
 
   "builders": [
@@ -39,7 +48,7 @@
         "--ovf20"
       ],
 
-      "communicator": "ssh",
+      "communicator": "{{user `communicator`}}",
       "ssh_username": "{{user `ssh_username`}}",
       "ssh_private_key_file": "{{user `ssh_private_key_file`}}",
       "ssh_wait_timeout": "1h",
@@ -78,8 +87,8 @@
       ],
       "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
       "scripts": [
-        "./scripts/80-create-packer-virt-sysprep-unit-file.sh",
-        "./scripts/81-create-packer-virt-sysprep-run-control-script.sh"
+        "./scripts/provisioner/80-create-packer-virt-sysprep-unit-file.sh",
+        "./scripts/provisioner/81-create-packer-virt-sysprep-run-control-script.sh"
       ]
    },
    {
@@ -94,7 +103,7 @@
     },
     {
       "type": "file",
-      "source": "./scripts/zero-free-space.sh",
+      "source": "./scripts/provisioner/zero-free-space.sh",
       "destination": "{{user `zero_script_upload_path`}}"
     },
     {
@@ -104,7 +113,49 @@
       ],
       "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
       "scripts": [
-        "./scripts/90-create-zero-free-space-unit-file.sh"
+        "./scripts/provisioner/90-create-zero-free-space-unit-file.sh"
+      ]
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "BOX_USERNAME={{user `admin_user`}}",
+        "BOX_USERPASSWD={{user `admin_passwd`}}",
+        "COMMUNICATOR={{user `communicator`}}",
+        "TEMPLATE={{user `template`}}",
+        "VAGRANTFILE_BASE_DIR={{user `vagrantfile_base_dir`}}",
+        "VAGRANTFILE_NAME={{user `vagrantfile_filename_prefix`}}.{{build_type}}",
+        "VAGRANT_CLOUD_ORG={{user `vagrant_cloud_org`}}"
+      ],
+      "execute_command": [
+        "{{user `local_shell_binary`}}", "-c", "chmod +x {{.Script}} && {{.Vars}} {{.Script}}; chmod -x {{.Script}}"
+      ],
+      "scripts": [
+        "./scripts/post-processor/00-generate-box-vagrantfiles.sh"
+      ]
+    },
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "vagrantfile_template": "{{user `vagrantfile_base_dir`}}/{{user `template`}}/{{user `vagrantfile_filename_prefix`}}.{{build_type}}",
+      "vagrantfile_template_generated": true,
+      "output": "boxes/{{user `template`}}-{{.Provider}}.box"
+    },
+    {
+      "type": "shell-local",
+      "environment_vars": [
+        "DEBUG={{user `debug`}}",
+        "VAGRANTFILE_BASE_DIR={{user `vagrantfile_base_dir`}}"
+      ],
+      "execute_command": [
+        "{{user `local_shell_binary`}}", "-c", "chmod +x {{.Script}} && {{.Vars}} {{.Script}}; chmod -x {{.Script}}"
+      ],
+      "scripts": [
+        "./scripts/post-processor/99-clean-up-generated-box-vagrantfiles.sh"
       ]
     }
   ]
