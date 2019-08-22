@@ -1,0 +1,35 @@
+{
+  "variables": {
+    "template": "debian-9-x86_64-null",
+    "vagrant_cloud_org": "foosite"
+  },
+
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo Doing stuff..."]
+    },
+    [
+      {
+        "type": "artifice",
+        "files": [
+          "./boxes/debian-9-x86_64-virtualbox.box"
+        ]
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "{{ user `vagrant_cloud_org` }}/{{ user `template` }}",
+        "version": "0.1.0",
+        "no_release": true,
+        "version_description": "Initial release"
+      }
+    ]
+  ]
+}
