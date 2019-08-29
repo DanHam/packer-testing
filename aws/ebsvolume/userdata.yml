@@ -1,0 +1,50 @@
+#cloud-config
+
+# Create required groups
+groups:
+  - debadmin
+
+# Add users to the system. Users are added after groups are added.
+users:
+  - name: debadmin
+    gecos: Debian Administrator
+    primary-group: debadmin
+    groups: cdrom,floppy,sudo,audio,dip,video,plugdev,netdev,systemd-journal
+    shell: /bin/bash
+    lock_passwd: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDV14up9OBdbyUPuuSCUOnSyTZOTx4i13nyIASlkQpLs7zKUIJL8Sni7BASmN3LFi9+BsiuBxC3RkVj84H6fe+mKqC6zpdFtWE2dN7U0bOXGVnDPOSXcW7B52NRP+sL7ShTcpDBsLUq0N4Hc64XSTOAbfOiQY9OUPSiW5nUQSuPHm9K1G0w//dImqyiikBWvBWJag2phaZDbeOz7nHcOdZnLhv0uWZBq/YRSdo0Jyn3yg/lG07PaWslPPw2s4eG7i/eWNbkWUshvRGdzU+pf5NCQl4iCetuaXlPUpIFZzjTgPE5IE+gXCue7Bg08ZAz25lk3g8B3TYlhfCkVm/8nQAGuYnTLMfxwacPJIXDTd/mD7efyNOOpz8nmylZoaiFBVrQWdmlVopqIMXArK+/NE4Md58ErUKPQY0Z/J/rFANN4JRFVU2XcC/0wl+uTvPxigspLpozp4mmjG/JCUhTNbihK/ICd4G87Xl+SAGoCEfly3NQcXpLgRUJou255Gj+CkRT2cOeCoNDhLlDLJ7d/twB0LzVfgQAGMCMWButudiCaX6NOSDhUAcHIKoNxQN28cO1xKGrEKxlw0iR2XWUftowxjfvifRYlbHAtrw6UXofNiZWfl8fPpHKPvbEgB83kK3OMWMP1cUAksMCUJdD8hCMPFxLS9Kj6cSz9Xlq/CSKyQ== JustSomeFooKey
+
+# Debians cloud-init resets the system locale to en_US.UTF-8
+locale: en_GB.UTF-8
+
+# Set the hostname
+#
+# If set to true no changes to the hostname will be allowed and additional
+# settings relating to hostname changes will be ignored. Note that if
+# manage_etc-hosts is set to true or template, additional hostname
+# settings will still be written to /etc/hosts even though no actual
+# changes to the hosts name will occur.
+preserve_hostname: false
+# For EC2 instances if the hostname is set but the fqdn setting is omitted
+# then only the transient hostname will be configured with the specified
+# value.
+# The static hostname and domain name will be set using EC2 instance
+# metadata. Typically for EC2 this would result in a static hostname
+# comprised of something like ip-172-31-34-245 for the hostname and
+# eu-west-1.compute.internal for the domain name.
+# If manage_etc_hosts is set to true or template then the transient
+# hostname will be written to the /etc/hosts file along with the static
+# hostname.
+hostname: packer-builder
+# For EC2 instances setting the fqdn will result in the transient and
+# static hostnames being set to the specified value. This is the
+# configuration recommended by RedHat
+fqdn: packer-builder.internal
+
+# Manage /etc/hosts using the /etc/cloud/templates/hosts.debian.tmpl
+manage_etc_hosts: template
+
+# Timezone
+timezone: Europe/London

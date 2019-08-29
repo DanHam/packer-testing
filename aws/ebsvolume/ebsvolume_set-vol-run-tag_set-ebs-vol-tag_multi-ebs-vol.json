@@ -1,0 +1,71 @@
+{
+  "variables": {
+    "template": "EBS Volume Test",
+
+    "aws_access_key": "{{env `PACKER_AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `PACKER_AWS_SECRET_KEY`}}",
+    "aws_region": "eu-west-2",
+    "aws_instance_type": "t2.micro",
+
+    "ssh_username": "debadmin",
+    "ssh_private_key": "/Users/dan/.ssh/id_rsa",
+    "ssh_timeout": "15m"
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebsvolume",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `aws_region`}}",
+
+      "instance_type": "{{user `aws_instance_type`}}",
+      "source_ami": "ami-0c989c2b85e631ee4",
+      "run_tags": {
+        "Name": "Packer: Debian Build Instance for '{{user `template`}}'"
+      },
+      "run_volume_tags": {
+        "Name": "Packer: Debian Build Instance Volume for '{{user `template`}}'",
+        "IamRunVolumeTagKey": "IamRunVolumeTagValue"
+      },
+      "shutdown_behavior": "stop",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_private_key_file": "{{user `ssh_private_key`}}",
+      "ssh_timeout": "{{user `ssh_timeout`}}",
+      "user_data_file": "userdata.yml",
+
+      "ebs_volumes" : [
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdf",
+          "delete_on_termination": false,
+          "tags" : {
+            "Name": "xvdf",
+            "Created": "{{isotime \"2006-01-02 15:04:05\"}}",
+            "IamVolumeTagKey1": "IamVolumeTagValue1"
+          },
+          "volume_size": 1
+        },
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdg",
+          "delete_on_termination": false,
+          "tags" : {
+            "Name": "xvdg",
+            "Created": "{{isotime \"2006-01-02 15:04:05\"}}",
+            "PackerBuildType": "{{build_type}}",
+            "PackerVersion": "{{packer_version}}",
+            "IamVolumeTagKey2": "IamVolumeTagValue2"
+          },
+          "volume_size": 1
+        }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "breakpoint",
+      "note": "Pause for checking of Volume tags"
+    }
+  ]
+}
