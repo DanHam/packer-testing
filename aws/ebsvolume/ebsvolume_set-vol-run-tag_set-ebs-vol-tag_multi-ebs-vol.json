@@ -20,7 +20,13 @@
       "region": "{{user `aws_region`}}",
 
       "instance_type": "{{user `aws_instance_type`}}",
-      "source_ami": "ami-0c989c2b85e631ee4",
+      "source_ami_filter": {
+        "filters": {
+          "name": "debian-stretch-hvm-x86_64-gp2-*"
+        },
+        "most_recent": true,
+        "owners": "379101102735"
+      },
       "run_tags": {
         "Name": "Packer: Debian Build Instance for '{{user `template`}}'"
       },
