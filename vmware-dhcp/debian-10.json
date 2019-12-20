@@ -1,0 +1,63 @@
+{
+  "variables": {
+    "template": "debian-10"
+  },
+
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "http_directory": "http/",
+      "communicator": "ssh",
+      "output_directory": "output-{{user `template`}}-{{build_name}}",
+      "headless": "false",
+
+      "iso_url": "file:///Users/dan/stuff/iso/os/debian/debian10.2x86_64/debian-10.2.0-amd64-netinst.iso",
+      "iso_checksum": "5495c8378b829df7386b9bac5bc701f7ad8b2843d088e8636c89549519cf176100eacb90121af3934a8c5229cbe7d2fd23342eda330d56fb45fb2d91f2117fb4",
+      "iso_checksum_type": "sha512",
+
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "auto <wait>",
+        "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed-std.cfg <wait>",
+        "debian-installer=en_GB <wait>",
+        "locale=en_GB <wait>",
+        "keymap=uk <wait>",
+        "hostname=localhost <wait>",
+        "domain=localdomain <wait>",
+        "<enter>"
+      ],
+      "boot_wait": "5s",
+
+      "version": "9",
+      "guest_os_type": "debian8-64",
+      "vm_name": "{{user `template`}}-{{build_name}}",
+      "display_name": "Packer-{{user `template`}}-{{build_name}}",
+      "cpus": "1",
+      "memory": "1024",
+      "vmdk_name": "{{user `template`}}-{{build_name}}",
+      "disk_type_id": "0",
+      "disk_size": "10240",
+      "network_adapter_type": "vmxnet3",
+      "sound": false,
+      "serial": "NONE",
+      "usb": false,
+
+      "ssh_username": "packer",
+      "ssh_private_key_file": "keys/vagrant",
+      "ssh_wait_timeout": "10000s",
+
+      "shutdown_command": "sudo /sbin/poweroff"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{ .Vars }} $(command -v bash) '{{.Path }}'",
+      "inline": [
+        "touch /foo"
+      ]
+    }
+  ]
+}
